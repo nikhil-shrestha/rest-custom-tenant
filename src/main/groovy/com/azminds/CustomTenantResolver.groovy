@@ -2,54 +2,38 @@ package com.azminds
 
 import com.azminds.security.User
 import grails.gorm.DetachedCriteria
-import grails.plugin.springsecurity.rest.token.storage.TokenStorageService
+import grails.plugin.springsecurity.SpringSecurityService
 import groovy.transform.CompileStatic
 import org.grails.datastore.mapping.multitenancy.AllTenantsResolver
 import org.grails.datastore.mapping.multitenancy.exceptions.TenantNotFoundException
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Lazy
 import org.springframework.security.core.userdetails.UserDetails
-import org.springframework.web.context.request.RequestAttributes
-import org.springframework.web.context.request.RequestContextHolder
-import org.springframework.web.context.request.ServletWebRequest
-
-import javax.servlet.http.HttpServletRequest
 
 @CompileStatic
 class CustomTenantResolver implements AllTenantsResolver {
 
-  public static final String HEADER_NAME = 'Authorization'
-  public static final String HEADER_VALUE_PREFFIX = 'Bearer '
-
-  String headerName = HEADER_NAME
-  String headerValuePreffix = HEADER_VALUE_PREFFIX
-
   @Autowired
-  TokenStorageService tokenStorageService
-
+  @Lazy
+  SpringSecurityService springSecurityService
 
   @Override
   Serializable resolveTenantIdentifier() throws TenantNotFoundException {
-
-    RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes()
-    if (requestAttributes instanceof ServletWebRequest) {
-
-      HttpServletRequest httpServletRequest = ((ServletWebRequest) requestAttributes).getRequest()
-      String token = httpServletRequest.getHeader(headerName.toLowerCase())
-      if (!token) {
-        throw new TenantNotFoundException("Tenant could not be resolved from HTTP Header: ${headerName}")
-      }
-
-      if (token.startsWith(headerValuePreffix)) {
-        token = token.substring(headerValuePreffix.length())
-      }
-      UserDetails userDetails = tokenStorageService.loadUserByToken(token)
-      String username = userDetails?.username
-      if (username) {
-        return username
-      }
-      throw new TenantNotFoundException("Tenant could not be resolved from HTTP Header: ${headerName}")
+    String username = loggedUsername()
+    if ( username ) {
+      return username
     }
-    throw new TenantNotFoundException("Tenant could not be resolved outside a web request")
+    throw new TenantNotFoundException("Tenant could not be resolved from Spring Security Principal")
+  }
+
+  String loggedUsername() {
+    if ( springSecurityService.principal instanceof String ) {
+      return springSecurityService.principal
+    }
+    if (springSecurityService.principal instanceof UserDetails) {
+      return ((UserDetails) springSecurityService.principal).username
+    }
+    null
   }
 
   @Override
@@ -57,8 +41,7 @@ class CustomTenantResolver implements AllTenantsResolver {
     User.withTransaction(readOnly: true) {
       new DetachedCriteria(User)
         .distinct('username')
-        .list() as Iterable<Serializable>
+        .list()  as Iterable<Serializable>
     }
   }
-
 }

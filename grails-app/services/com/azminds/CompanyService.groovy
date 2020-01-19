@@ -1,7 +1,11 @@
 package com.azminds
 
+import grails.gorm.multitenancy.CurrentTenant
 import grails.gorm.services.Service
+import groovy.transform.CompileStatic
 
+@CompileStatic
+@CurrentTenant
 @Service(Company)
 interface CompanyService {
 
