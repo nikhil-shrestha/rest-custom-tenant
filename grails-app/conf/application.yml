@@ -91,28 +91,4 @@ environments:
             url: jdbc:postgresql://localhost:5432/subscribe_db
     test:
         dataSource:
-            url: jdbc:postgresql://localhost:5432/subscribe
-    production:
-        dataSource:
-            dbCreate: update
-            url: jdbc:postgresql://localhost:5432/subscribe
-            username: 'postgres'
-            password: 'toor'
-            properties:
-                jmxEnabled: true
-                initialSize: 5
-                maxActive: 500
-                minIdle: 5
-                maxIdle: 25
-                maxWait: 10000
-                maxAge: 600000
-                timeBetweenEvictionRunsMillis: 5000
-                minEvictableIdleTimeMillis: 60000
-                validationQuery: SELECT 1
-                validationQueryTimeout: 3
-                validationInterval: 15000
-                testOnBorrow: true
-                testWhileIdle: true
-                testOnReturn: false
-                jdbcInterceptors: ConnectionState
-                defaultTransactionIsolation: 2 # TRANSACTION_READ_COMMITTED
+            url: jdbc:postgresql://localhost:5432/subscribe_db
