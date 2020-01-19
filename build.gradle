@@ -63,6 +63,8 @@ dependencies {
     testCompile "org.mockito:mockito-core"
     testCompile "io.micronaut:micronaut-http-client"
     testCompile "org.grails:grails-web-testing-support"
+
+    provided 'org.postgresql:postgresql:9.4.1211.jre7'
 }
 
 bootRun {
