@@ -4,6 +4,9 @@ grails:
     codegen:
         defaultPackage: com.azminds
     gorm:
+        multiTenancy:
+            mode: DISCRIMINATOR
+            tenantResolverClass: com.azminds.CustomTenantResolver
         reactor:
             # Whether to translate GORM events into Reactor events
             # Disabled by default for performance reasons
